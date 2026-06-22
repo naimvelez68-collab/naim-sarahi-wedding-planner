@@ -1,13 +1,17 @@
 export const WEDDING_DATE = '2026-08-08'
 export const BRIDE_NAME   = 'Sarahí'
 export const GROOM_NAME   = 'Naim'
-export const VENUE        = 'Por definir'
+export const VENUE        = 'Por confirmar (Padel / Hostería Ambuqui / Airbnb)'
 export const CITY         = 'Ibarra'
 export const COUNTRY      = 'Ecuador'
 
-export const MAX_PER_TABLE     = 10
-export const BEER_PRICE_PER_CAN = 0.75
+export const MAX_PER_TABLE              = 10
+export const BEER_PRICE_PER_CAN        = 0.75
 export const BOCADITO_BUDGET_PER_PERSON = 10
+export const BUDGET_TOTAL              = 2500
+export const PLATE_PRICE               = 6.75   // moro
+export const DESSERT_PRICE             = 1.25
+export const TOTAL_PLATE_PRICE         = PLATE_PRICE + DESSERT_PRICE // $8/persona
 
 export const GUEST_GROUP_LABELS: Record<string, string> = {
   bride_family: 'Familia Novia',

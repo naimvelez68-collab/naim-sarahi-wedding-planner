@@ -398,7 +398,7 @@ export const useWeddingStore = create<WeddingStore>()(
         }),
     }),
     {
-      name: 'wedding-planner-v1',
+      name: 'wedding-planner-v2',
       storage: createJSONStorage(() => localStorage),
     }
   )
