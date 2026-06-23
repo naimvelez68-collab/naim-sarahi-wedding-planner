@@ -1,48 +1,21 @@
 export default async function handler(req, res) {
-  console.log('[chat] method:', req.method)
-
-  if (req.method !== 'POST') {
-    return res.status(405).end()
-  }
-
-  console.log('[chat] reading apiKey')
+  console.log('[chat] start', req.method)
+  if (req.method !== 'POST') return res.status(405).end()
   const apiKey = process.env.GEMINI_API_KEY
-  console.log('[chat] apiKey present:', !!apiKey, 'length:', apiKey?.length)
-
-  if (!apiKey) {
-    return res.status(500).json({ error: 'Sin API key' })
-  }
-
-  console.log('[chat] reading body')
-  const body = req.body || {}
-  const messages = Array.isArray(body.messages) ? body.messages : []
-  console.log('[chat] messages count:', messages.length)
-
-  if (!messages.length) {
-    return res.status(400).json({ error: 'Sin mensajes' })
-  }
-
-  console.log('[chat] calling Gemini')
+  if (!apiKey) return res.status(500).json({ error: 'no key' })
+  const { messages = [] } = req.body || {}
+  if (!messages.length) return res.status(400).json({ error: 'no messages' })
+  console.log('[chat] calling gemini, messages:', messages.length)
   try {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`
-    const payload = {
-      contents: messages,
-      generationConfig: { maxOutputTokens: 300, temperature: 0.7 },
-    }
-    const r = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    })
-    console.log('[chat] Gemini status:', r.status)
-    const data = await r.json()
-    if (!r.ok) {
-      console.log('[chat] Gemini error:', data?.error?.message)
-      return res.status(500).json({ error: data?.error?.message || 'Error Gemini' })
-    }
-    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || 'Sin respuesta'
-    console.log('[chat] success, reply length:', text.length)
-    return res.status(200).json({ text })
+    const r = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+      { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents: messages, generationConfig: { maxOutputTokens: 400 } }) }
+    )
+    const d = await r.json()
+    console.log('[chat] gemini status:', r.status)
+    if (!r.ok) return res.status(500).json({ error: d?.error?.message || 'gemini error' })
+    return res.status(200).json({ text: d?.candidates?.[0]?.content?.parts?.[0]?.text || 'sin respuesta' })
   } catch (e) {
     console.log('[chat] exception:', String(e))
     return res.status(500).json({ error: String(e) })
