@@ -52,14 +52,25 @@ export const ChatBot: React.FC = () => {
     setInput('')
     setLoading(true)
     try {
-      const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: updated, context }),
-      })
+      const apiKey = (import.meta as unknown as { env: Record<string, string> }).env.VITE_GEMINI_KEY
+      if (!apiKey) throw new Error('Clave de IA no configurada')
+
+      const systemText = `Eres el asistente del Wedding Planner de Naim y Sarahi. Boda: 8 agosto 2026, Ibarra, Ecuador. Presupuesto: $${context.budgetTotal}. Invitados: ${context.totalGuests} registrados, ${context.confirmed} confirmados, ${context.pending} pendientes. Presupuesto real: $${context.budgetReal} de $${context.budgetTotal}. Pagado: $${context.budgetPaid}. Pendiente: $${context.budgetPending}. Lugar: ${context.venue}. Responde en espanol, amigable y conciso, maximo 3 parrafos.`
+
+      const payload = {
+        system_instruction: { parts: [{ text: systemText }] },
+        contents: updated,
+        generationConfig: { maxOutputTokens: 600, temperature: 0.7 },
+      }
+
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+        { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }
+      )
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Error')
-      setMessages(prev => [...prev, { role: 'model', parts: [{ text: data.text }] }])
+      if (!res.ok) throw new Error(data?.error?.message ?? 'Error de Gemini')
+      const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? 'Sin respuesta.'
+      setMessages(prev => [...prev, { role: 'model', parts: [{ text: reply }] }])
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Error al conectar')
     } finally {
