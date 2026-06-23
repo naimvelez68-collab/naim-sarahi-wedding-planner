@@ -24,10 +24,12 @@ const STATUS_BADGE: Record<BudgetStatus, { variant: 'olive' | 'amber' | 'gray'; 
 }
 
 export const Budget: React.FC = () => {
-  const { budgetItems, guests, addBudgetItem, updateBudgetItem, deleteBudgetItem } = useWeddingStore()
+  const { budgetItems, guests, config, updateConfig, addBudgetItem, updateBudgetItem, deleteBudgetItem } = useWeddingStore()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editItem, setEditItem]       = useState<BudgetItem | null>(null)
   const [deleteId, setDeleteId]       = useState<string | null>(null)
+  const [editingTotal, setEditingTotal] = useState(false)
+  const [totalDraft, setTotalDraft]     = useState('')
   const [form, setForm]               = useState(EMPTY)
   const [filterPriority, setFilterPriority] = useState<BudgetPriority | 'all'>('all')
   const [filterStatus, setFilterStatus]     = useState<BudgetStatus | 'all'>('all')
@@ -80,6 +82,68 @@ export const Budget: React.FC = () => {
           </div>
         }
       />
+
+      {/* Presupuesto total editable */}
+      <Card className="p-4 border-2 border-gold-200 bg-gold-50">
+        <div className="flex items-center justify-between flex-wrap gap-3">
+          <div>
+            <p className="text-xs text-stone-500 uppercase tracking-wider font-semibold">Presupuesto total aprobado</p>
+            {editingTotal ? (
+              <div className="flex items-center gap-2 mt-1">
+                <span className="text-stone-500 font-medium">$</span>
+                <input
+                  type="number"
+                  value={totalDraft}
+                  onChange={e => setTotalDraft(e.target.value)}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter') {
+                      const v = parseFloat(totalDraft)
+                      if (!isNaN(v) && v > 0) updateConfig({ budgetTotal: v })
+                      setEditingTotal(false)
+                    }
+                    if (e.key === 'Escape') setEditingTotal(false)
+                  }}
+                  className="w-36 text-2xl font-bold text-gold-700 border-b-2 border-gold-400 bg-transparent outline-none"
+                  autoFocus
+                />
+                <button
+                  onClick={() => {
+                    const v = parseFloat(totalDraft)
+                    if (!isNaN(v) && v > 0) updateConfig({ budgetTotal: v })
+                    setEditingTotal(false)
+                  }}
+                  className="text-xs bg-olive-600 text-white px-3 py-1 rounded-lg hover:bg-olive-700"
+                >Guardar</button>
+                <button onClick={() => setEditingTotal(false)} className="text-xs text-stone-400 hover:text-stone-600">Cancelar</button>
+              </div>
+            ) : (
+              <button
+                onClick={() => { setTotalDraft(String(config.budgetTotal)); setEditingTotal(true) }}
+                className="flex items-center gap-2 mt-1 group"
+                title="Clic para editar el presupuesto total"
+              >
+                <span className="text-2xl font-bold text-gold-700 font-serif">{formatCurrency(config.budgetTotal)}</span>
+                <Edit2 className="w-4 h-4 text-stone-400 group-hover:text-gold-600 transition-colors" />
+              </button>
+            )}
+          </div>
+          <div className="text-right">
+            <p className="text-xs text-stone-500">Total real vs presupuesto</p>
+            <p className={`text-xl font-bold font-serif ${totals.totalReal > config.budgetTotal ? 'text-red-600' : 'text-olive-600'}`}>
+              {formatCurrency(totals.totalReal)} / {formatCurrency(config.budgetTotal)}
+            </p>
+            <p className={`text-sm font-medium mt-0.5 ${totals.totalReal > config.budgetTotal ? 'text-red-500' : 'text-olive-500'}`}>
+              {totals.totalReal > config.budgetTotal
+                ? `⚠️ $${(totals.totalReal - config.budgetTotal).toFixed(0)} sobre el presupuesto`
+                : `✓ $${(config.budgetTotal - totals.totalReal).toFixed(0)} disponibles`
+              }
+            </p>
+          </div>
+        </div>
+        <div className="mt-3">
+          <ProgressBar value={totals.totalReal} max={config.budgetTotal} color={totals.totalReal > config.budgetTotal ? 'red' : 'gold'} />
+        </div>
+      </Card>
 
       {/* Summary */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">

@@ -108,7 +108,19 @@ export const Dashboard: React.FC = () => {
           <StatCard label="Pendiente"       value={formatCurrency(budget.totalPending)}   icon={<DollarSign className="w-5 h-5" />} color="amber" />
         </div>
         <Card className="mt-3 p-4">
-          <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center justify-between mb-1">
+            <p className="text-sm font-medium text-stone-600">Real vs presupuesto aprobado</p>
+            <span className={`text-sm font-bold ${budget.totalReal > config.budgetTotal ? 'text-red-600' : 'text-olive-600'}`}>
+              {formatCurrency(budget.totalReal)} / {formatCurrency(config.budgetTotal)}
+            </span>
+          </div>
+          <ProgressBar value={budget.totalReal} max={config.budgetTotal} color={budget.totalReal > config.budgetTotal ? 'red' : 'gold'} />
+          <p className={`text-xs mt-1 font-medium ${budget.totalReal > config.budgetTotal ? 'text-red-500' : 'text-olive-500'}`}>
+            {budget.totalReal > config.budgetTotal
+              ? `⚠️ $${(budget.totalReal - config.budgetTotal).toFixed(0)} sobre presupuesto`
+              : `✓ $${(config.budgetTotal - budget.totalReal).toFixed(0)} disponibles`}
+          </p>
+          <div className="mt-3 flex items-center justify-between mb-2">
             <p className="text-sm font-medium text-stone-600">Progreso de pagos</p>
             <span className="text-sm font-bold text-gold-600">{Math.round(budgetPct)}%</span>
           </div>
