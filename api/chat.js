@@ -1,48 +1,50 @@
 export default async function handler(req, res) {
+  console.log('[chat] method:', req.method)
+
   if (req.method !== 'POST') {
-    res.status(405).end('Method Not Allowed')
-    return
+    return res.status(405).end()
   }
 
+  console.log('[chat] reading apiKey')
   const apiKey = process.env.GEMINI_API_KEY
+  console.log('[chat] apiKey present:', !!apiKey, 'length:', apiKey?.length)
+
   if (!apiKey) {
-    res.status(500).json({ error: 'Sin API key' })
-    return
+    return res.status(500).json({ error: 'Sin API key' })
   }
 
-  let messages, context
-  try {
-    const body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {})
-    messages = body.messages || []
-    context  = body.context  || {}
-  } catch {
-    res.status(400).json({ error: 'Body invalido' })
-    return
+  console.log('[chat] reading body')
+  const body = req.body || {}
+  const messages = Array.isArray(body.messages) ? body.messages : []
+  console.log('[chat] messages count:', messages.length)
+
+  if (!messages.length) {
+    return res.status(400).json({ error: 'Sin mensajes' })
   }
 
-  const systemText = 'Eres el asistente del Wedding Planner de Naim y Sarahi. Boda 8 agosto 2026 Ibarra Ecuador. Responde en espanol, breve y amigable. Presupuesto aprobado: $' + (context.budgetTotal || 2000) + '. Invitados confirmados: ' + (context.confirmed || 0) + '.'
-
-  const payload = JSON.stringify({
-    system_instruction: { parts: [{ text: systemText }] },
-    contents: messages,
-    generationConfig: { maxOutputTokens: 500, temperature: 0.7 },
-  })
-
+  console.log('[chat] calling Gemini')
   try {
-    const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + apiKey
-    const geminiRes = await fetch(url, {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`
+    const payload = {
+      contents: messages,
+      generationConfig: { maxOutputTokens: 300, temperature: 0.7 },
+    }
+    const r = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: payload,
+      body: JSON.stringify(payload),
     })
-    const data = await geminiRes.json()
-    if (!geminiRes.ok) {
-      res.status(500).json({ error: data?.error?.message || 'Error Gemini ' + geminiRes.status })
-      return
+    console.log('[chat] Gemini status:', r.status)
+    const data = await r.json()
+    if (!r.ok) {
+      console.log('[chat] Gemini error:', data?.error?.message)
+      return res.status(500).json({ error: data?.error?.message || 'Error Gemini' })
     }
-    const text = (data?.candidates?.[0]?.content?.parts?.[0]?.text) || 'Sin respuesta'
-    res.status(200).json({ text })
-  } catch (err) {
-    res.status(500).json({ error: 'Excepcion: ' + String(err) })
+    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || 'Sin respuesta'
+    console.log('[chat] success, reply length:', text.length)
+    return res.status(200).json({ text })
+  } catch (e) {
+    console.log('[chat] exception:', String(e))
+    return res.status(500).json({ error: String(e) })
   }
 }
