@@ -4,6 +4,7 @@ import { Layout } from './components/layout/Layout'
 import { useWeddingStore } from './store/useWeddingStore'
 import { useSupabaseSync } from './hooks/useSupabaseSync'
 import { isSupabaseConfigured } from './lib/supabase'
+import { ChatBot } from './components/ChatBot'
 
 // Pages
 import { Dashboard }    from './pages/Dashboard'
@@ -98,6 +99,7 @@ function AppInner() {
         </Routes>
       </Layout>
       <SupabaseBadge />
+      <ChatBot />
     </BrowserRouter>
   )
 }
