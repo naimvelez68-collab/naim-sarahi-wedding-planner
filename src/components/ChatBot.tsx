@@ -52,7 +52,7 @@ export const ChatBot: React.FC = () => {
     setInput('')
     setLoading(true)
     try {
-      const apiKey = (import.meta as unknown as { env: Record<string, string> }).env.VITE_GEMINI_KEY
+      const apiKey = (import.meta as unknown as { env: Record<string, string> }).env['VITE_GEMINI_KEY']
       if (!apiKey) throw new Error('Clave de IA no configurada')
 
       const systemText = `Eres el asistente del Wedding Planner de Naim y Sarahi. Boda: 8 agosto 2026, Ibarra, Ecuador. Presupuesto: $${context.budgetTotal}. Invitados: ${context.totalGuests} registrados, ${context.confirmed} confirmados, ${context.pending} pendientes. Presupuesto real: $${context.budgetReal} de $${context.budgetTotal}. Pagado: $${context.budgetPaid}. Pendiente: $${context.budgetPending}. Lugar: ${context.venue}. Responde en espanol, amigable y conciso, maximo 3 parrafos.`
