@@ -31,7 +31,7 @@ export const defaultConfig: WeddingConfig = {
   venue:       'Por confirmar (Padel tía / Hostería Ambuqui / Airbnb)',
   city:        'Ibarra',
   country:     'Ecuador',
-  budgetTotal:  2500,
+  budgetTotal:  2000,
   guestLimit:   150,
   maxPerTable:  10,
 }
@@ -277,7 +277,7 @@ export const seedBudget: BudgetItem[] = [
     vendorId: null, notes: 'Fondo de emergencia — guardar en efectivo el día de la boda', receipt: '', createdAt: t, updatedAt: t,
   },
 ]
-// Total estimado: ~$2,488 ✅ dentro del presupuesto de $2,500
+// Total estimado: ~$2,488 — presupuesto real aprobado: $2,000
 
 // ─── Vendors ────────────────────────────────────────────────────────────────
 export const seedVendors: Vendor[] = [
