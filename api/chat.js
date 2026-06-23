@@ -1,4 +1,4 @@
-export default async function handler(req, res) {
+﻿export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' })
   }
@@ -13,7 +13,7 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'messages requerido' })
   }
 
-  const systemText = `Eres el asistente inteligente del Wedding Planner de Naim y Sarahí.
+  const systemText = `Eres el asistente inteligente del Wedding Planner de Naim y SarahÃ­.
 Boda: 8 de agosto 2026, Ibarra, Ecuador. Presupuesto aprobado: $${context?.budgetTotal ?? 2000}.
 
 DATOS ACTUALES DEL PLANIFICADOR:
@@ -23,7 +23,7 @@ DATOS ACTUALES DEL PLANIFICADOR:
 - Pendiente por pagar: $${context?.budgetPending ?? 0}
 - Lugar: ${context?.venue ?? 'Por confirmar'}
 
-Responde en español, de forma amigable, directa y útil. Si te preguntan sobre datos del planificador usa los datos de arriba. Máximo 3 párrafos por respuesta.`
+Responde en espaÃ±ol, de forma amigable, directa y Ãºtil. Si te preguntan sobre datos del planificador usa los datos de arriba. MÃ¡ximo 3 pÃ¡rrafos por respuesta.`
 
   const payload = {
     system_instruction: { parts: [{ text: systemText }] },
