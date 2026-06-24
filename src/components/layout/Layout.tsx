@@ -1,17 +1,16 @@
 import React, { useState } from 'react'
-import { Menu, Bell } from 'lucide-react'
+import { Menu, User } from 'lucide-react'
 import { Sidebar } from './Sidebar'
-import { useWeddingStore } from '../../store/useWeddingStore'
-import { isDateSoon, isDatePast } from '../../utils'
+import { NotificationBell } from '../NotificationBell'
+import { getUserName } from '../UserNameModal'
+import { useChangeTracker } from '../../hooks/useChangeTracker'
 
 export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const { budgetItems, tasks, vendors } = useWeddingStore()
+  const userName = getUserName()
 
-  const alertCount =
-    budgetItems.filter(b => b.status !== 'paid' && b.dueDate && (isDateSoon(b.dueDate, 14) || isDatePast(b.dueDate))).length +
-    tasks.filter(t => t.status !== 'completed' && (isDateSoon(t.dueDate, 7) || isDatePast(t.dueDate))).length +
-    vendors.filter(v => v.status !== 'paid' && v.advance === 0).length
+  // Activate change tracker
+  useChangeTracker()
 
   return (
     <div className="flex h-screen bg-parchment font-sans overflow-hidden">
@@ -26,19 +25,24 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
           >
             <Menu className="w-5 h-5" />
           </button>
+
           <div className="flex items-center gap-2 ml-auto">
-            {alertCount > 0 && (
-              <div className="relative">
-                <Bell className="w-5 h-5 text-stone-500" />
-                <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold">
-                  {alertCount > 9 ? '9+' : alertCount}
-                </span>
-              </div>
-            )}
+            {/* Notification bell with changelog */}
+            <NotificationBell />
+
             <div className="h-8 w-px bg-stone-200 mx-1 hidden sm:block" />
+
+            {/* Current user + wedding info */}
             <div className="text-right hidden sm:block">
               <p className="text-sm font-semibold text-stone-700">Naim & Sarahí</p>
-              <p className="text-xs text-stone-400">Panel Administrador</p>
+              {userName ? (
+                <p className="text-xs text-olive-600 flex items-center gap-1 justify-end">
+                  <User className="w-3 h-3" />
+                  {userName}
+                </p>
+              ) : (
+                <p className="text-xs text-stone-400">Panel Administrador</p>
+              )}
             </div>
           </div>
         </header>

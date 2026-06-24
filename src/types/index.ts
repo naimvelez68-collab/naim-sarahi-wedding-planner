@@ -315,6 +315,16 @@ export interface Beverage {
   updatedAt: string
 }
 
+// ─── Changelog ───────────────────────────────────────────────────────────────
+export interface ChangeEntry {
+  id: string
+  user: string
+  module: string
+  action: string
+  detail: string
+  timestamp: string
+}
+
 // ─── Savings / Decisions ──────────────────────────────────────────────────────
 export type SavingsDecisionType = 'keep' | 'reduce' | 'eliminate' | 'diy' | 'buy_early' | 'quote' | 'rent'
 

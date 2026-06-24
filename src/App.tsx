@@ -5,6 +5,7 @@ import { useWeddingStore } from './store/useWeddingStore'
 import { useSupabaseSync } from './hooks/useSupabaseSync'
 import { isSupabaseConfigured } from './lib/supabase'
 import { ChatBot } from './components/ChatBot'
+import { UserNameModal } from './components/UserNameModal'
 
 // Pages
 import { Dashboard }    from './pages/Dashboard'
@@ -100,6 +101,7 @@ function AppInner() {
       </Layout>
       <SupabaseBadge />
       <ChatBot />
+      <UserNameModal />
     </BrowserRouter>
   )
 }

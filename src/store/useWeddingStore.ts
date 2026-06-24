@@ -6,6 +6,7 @@ import {
   DayEvent, CeremonyStep, Game, MusicItem, MCSection,
   PhotoItem, PlanBItem, Responsible, ShoppingItem,
   EmergencyKitItem, Quote, BocaditoOption, Beverage, SavingsDecision,
+  ChangeEntry,
 } from '../types'
 import {
   defaultConfig, seedGuests, seedTables, seedBudget, seedVendors,
@@ -18,6 +19,13 @@ interface WeddingStore {
   // ── Meta ──────────────────────────────────────────────────────────────────
   isInitialized: boolean
   config: WeddingConfig
+
+  // ── Changelog ─────────────────────────────────────────────────────────────
+  changelog: ChangeEntry[]
+  lastReadAt: string
+  addChangeEntry: (entry: ChangeEntry) => void
+  setChangelog:   (entries: ChangeEntry[]) => void
+  markAllRead:    () => void
 
   // ── Data ──────────────────────────────────────────────────────────────────
   guests:       Guest[]
@@ -154,6 +162,16 @@ export const useWeddingStore = create<WeddingStore>()(
     (set, _get) => ({
       isInitialized: false,
       config:        defaultConfig,
+
+      // ── Changelog ───────────────────────────────────────────────────────────
+      changelog:  [],
+      lastReadAt: new Date(0).toISOString(),
+      addChangeEntry: (entry) =>
+        set(s => ({ changelog: [entry, ...s.changelog].slice(0, 100) })),
+      setChangelog: (entries) =>
+        set({ changelog: entries }),
+      markAllRead: () =>
+        set({ lastReadAt: new Date().toISOString() }),
 
       guests:       [],
       tables:       [],

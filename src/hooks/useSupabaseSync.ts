@@ -87,6 +87,10 @@ export function useSupabaseSync() {
 
         if (data) {
           applyRow(data)
+          // Load changelog if column exists
+          if (Array.isArray(data.changelog) && data.changelog.length > 0) {
+            useWeddingStore.setState({ changelog: data.changelog })
+          }
         } else {
           // First time — push local data to Supabase
           const s = useWeddingStore.getState()
@@ -133,6 +137,12 @@ export function useSupabaseSync() {
           if (isSyncingRef.current) return
           isSyncingRef.current = true
           applyRow(payload.new)
+          // Sync changelog from other devices
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const newChangelog = (payload.new as any).changelog
+          if (Array.isArray(newChangelog)) {
+            useWeddingStore.setState({ changelog: newChangelog })
+          }
           isSyncingRef.current = false
         }
       )
