@@ -58,7 +58,7 @@ export const UserNameModal: React.FC = () => {
             value={name}
             onChange={e => { setName(e.target.value); setError(false) }}
             onKeyDown={e => e.key === 'Enter' && confirm()}
-            placeholder="Ej: Sandra, Naim, Sarahí..."
+            placeholder="Ej: EVELYN, SARAHÍ, NAIM..."
             maxLength={30}
             className={`w-full border-2 rounded-xl px-4 py-3 text-center text-lg font-medium outline-none transition-colors
               ${error ? 'border-red-400 bg-red-50' : 'border-gold-200 focus:border-gold-400 bg-parchment'}`}
