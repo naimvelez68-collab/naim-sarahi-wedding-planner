@@ -8,7 +8,7 @@ export const COUNTRY      = 'Ecuador'
 export const MAX_PER_TABLE              = 10
 export const BEER_PRICE_PER_CAN        = 0.75
 export const BOCADITO_BUDGET_PER_PERSON = 10
-export const BUDGET_TOTAL              = 2500
+export const BUDGET_TOTAL              = 5000
 export const PLATE_PRICE               = 6.75   // moro
 export const DESSERT_PRICE             = 1.25
 export const TOTAL_PLATE_PRICE         = PLATE_PRICE + DESSERT_PRICE // $8/persona
@@ -29,6 +29,7 @@ export const GUEST_STATUS_LABELS: Record<string, string> = {
 }
 
 export const BUDGET_CATEGORY_LABELS: Record<string, string> = {
+  venue:         'Salón / Lugar',
   food:          'Comida / Cena',
   bocaditos:     'Bocaditos',
   beverages:     'Bebidas / Cerveza',

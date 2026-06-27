@@ -50,7 +50,7 @@ export interface Table {
 }
 
 // ─── Budget ───────────────────────────────────────────────────────────────────
-export type BudgetCategory = 'food' | 'bocaditos' | 'beverages' | 'decoration' | 'church' | 'music' | 'photography' | 'dress' | 'suit' | 'makeup' | 'souvenirs' | 'transport' | 'unexpected' | 'other'
+export type BudgetCategory = 'venue' | 'food' | 'bocaditos' | 'beverages' | 'decoration' | 'church' | 'music' | 'photography' | 'dress' | 'suit' | 'makeup' | 'souvenirs' | 'transport' | 'unexpected' | 'other'
 export type BudgetStatus   = 'pending' | 'partial' | 'paid'
 export type BudgetPriority = 'mandatory' | 'important' | 'optional' | 'reducible'
 
