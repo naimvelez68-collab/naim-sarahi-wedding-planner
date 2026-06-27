@@ -1,10 +1,11 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
 
-// Vite exposes env via import.meta.env
-const url = (import.meta as unknown as { env: Record<string, string> }).env.VITE_SUPABASE_URL
-const key = (import.meta as unknown as { env: Record<string, string> }).env.VITE_SUPABASE_ANON_KEY
+const env = (import.meta as unknown as { env: Record<string, string> }).env
 
-export const supabase: SupabaseClient | null =
-  url && key ? createClient(url, key) : null
+// Anon key is public — safe to embed as fallback when Vercel env vars are missing
+const url = env.VITE_SUPABASE_URL || 'https://hoanquznfonsnzwvitlj.supabase.co'
+const key = env.VITE_SUPABASE_ANON_KEY || 'sb_publishable_pUDuYt8e-f14RAyUaK2DZQ_8pauPnZ1'
 
-export const isSupabaseConfigured = !!(url && key)
+export const supabase: SupabaseClient = createClient(url, key)
+
+export const isSupabaseConfigured = true
