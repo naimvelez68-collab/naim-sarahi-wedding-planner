@@ -66,11 +66,24 @@ const SupabaseBadge: React.FC = () => {
 // ── App ───────────────────────────────────────────────────────────────────────
 function AppInner() {
   const { isInitialized, initializeSeedData } = useWeddingStore()
-  useSupabaseSync()
+  const { isLoading } = useSupabaseSync()
 
   useEffect(() => {
-    if (!isInitialized) initializeSeedData()
-  }, [isInitialized, initializeSeedData])
+    // When Supabase is configured, wait for it to finish loading before deciding
+    // whether to fall back to seed data — avoids overwriting Supabase data with seed.
+    if (!isInitialized && (!isSupabaseConfigured || !isLoading)) {
+      initializeSeedData()
+    }
+  }, [isInitialized, isLoading, initializeSeedData])
+
+  if (isSupabaseConfigured && isLoading && !isInitialized) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#FAF7F0', fontFamily: 'sans-serif', flexDirection: 'column', gap: '12px' }}>
+        <div style={{ fontSize: '1.5rem' }}>💍</div>
+        <div style={{ color: '#3F4824', fontSize: '0.95rem' }}>Cargando datos de la boda…</div>
+      </div>
+    )
+  }
 
   return (
     <BrowserRouter>

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useWeddingStore } from '../store/useWeddingStore'
 import { supabase, isSupabaseConfigured } from '../lib/supabase'
 
@@ -68,6 +68,7 @@ export function useSupabaseSync() {
   const isSyncingRef  = useRef(false)
   const saveTimer     = useRef<ReturnType<typeof setTimeout> | null>(null)
   const lastSaved     = useRef<string>('')
+  const [isLoading, setIsLoading] = useState(isSupabaseConfigured)
 
   useEffect(() => {
     if (!isSupabaseConfigured || !supabase) return
@@ -102,6 +103,7 @@ export function useSupabaseSync() {
         console.warn('[Supabase] Load failed, using localStorage:', e)
       } finally {
         isSyncingRef.current = false
+        setIsLoading(false)
       }
     }
     load()
@@ -155,5 +157,5 @@ export function useSupabaseSync() {
     }
   }, [])
 
-  return { isSupabaseConfigured }
+  return { isSupabaseConfigured, isLoading }
 }
