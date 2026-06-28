@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react'
-import { Users, Plus, Search, Edit2, Trash2, Filter, UserCheck, UserX, Clock, Download } from 'lucide-react'
+import { Users, Plus, Search, Edit2, Trash2, Filter, UserCheck, UserX, Clock, Download, RefreshCw } from 'lucide-react'
 import { useWeddingStore } from '../store/useWeddingStore'
 import { Guest, GuestStatus, GuestGroup, GuestDiet } from '../types'
 import { PageHeader, Card, Button, Badge, Modal, Input, Select, Textarea, ConfirmDialog, EmptyState, StatCard } from '../components/ui'
@@ -27,6 +27,7 @@ export const Guests: React.FC = () => {
   const [editGuest, setEditGuest]       = useState<Guest | null>(null)
   const [deleteId, setDeleteId]         = useState<string | null>(null)
   const [form, setForm]                 = useState(EMPTY)
+  const [syncState, setSyncState]       = useState<'idle' | 'loading' | 'ok' | 'error'>('idle')
 
   const filtered = useMemo(() => guests.filter(g => {
     const matchSearch = g.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -59,6 +60,18 @@ export const Guests: React.FC = () => {
     if (deleteId) { deleteGuest(deleteId); setDeleteId(null) }
   }
 
+  const handleSync = async () => {
+    setSyncState('loading')
+    try {
+      const res = await fetch('/api/sync-rsvp', { method: 'POST' })
+      const data = await res.json()
+      setSyncState(data.ok ? 'ok' : 'error')
+    } catch {
+      setSyncState('error')
+    }
+    setTimeout(() => setSyncState('idle'), 4000)
+  }
+
   const handlePrint = () => {
     const rows = guests.map(g =>
       `${g.name}\t${GUEST_GROUP_LABELS[g.group]}\t${GUEST_STATUS_LABELS[g.status]}\t${g.hasCompanion ? `Sí (${g.companionCount})` : 'No'}\t${g.tableId ? tables.find(t => t.id === g.tableId)?.name || '—' : '—'}\t${g.dietaryRestriction !== 'none' ? g.dietaryRestriction : '—'}`
@@ -77,6 +90,15 @@ export const Guests: React.FC = () => {
         icon={<Users className="w-5 h-5" />}
         action={
           <div className="flex gap-2">
+            <Button
+              variant="secondary" size="sm"
+              onClick={handleSync}
+              disabled={syncState === 'loading'}
+              title="Sincronizar con velezguevara-boda.vercel.app"
+            >
+              <RefreshCw className={`w-4 h-4 ${syncState === 'loading' ? 'animate-spin' : ''}`} />
+              {syncState === 'loading' ? 'Sincronizando…' : syncState === 'ok' ? '¡Sincronizado!' : syncState === 'error' ? 'Error' : 'Sincronizar RSVP'}
+            </Button>
             <Button variant="secondary" size="sm" onClick={handlePrint}>
               <Download className="w-4 h-4" /> Imprimir
             </Button>
