@@ -17,6 +17,16 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      if (navigator.serviceWorker) {
+        navigator.serviceWorker.addEventListener('controllerchange', function() {
+          window.location.reload();
+        });
+        navigator.serviceWorker.addEventListener('message', function(e) {
+          if (e.data && e.data.type === 'FORCE_RELOAD') window.location.reload();
+        });
+      }
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

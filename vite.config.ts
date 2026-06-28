@@ -7,6 +7,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
+      selfDestroying: true,
       includeAssets: ['favicon.ico', '*.png', '*.svg'],
       manifest: {
         name: 'Naim & Sarahí — Wedding Planner',
