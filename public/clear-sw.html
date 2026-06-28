@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Actualizando Wedding Planner…</title>
+  <style>
+    body { font-family: sans-serif; display: flex; flex-direction: column;
+           align-items: center; justify-content: center; min-height: 100vh;
+           margin: 0; background: #FAF7F0; color: #3F4824; }
+    h2 { font-size: 1.4rem; margin-bottom: 1rem; }
+    p  { color: #666; font-size: 0.95rem; }
+  </style>
+</head>
+<body>
+  <h2>⏳ Limpiando caché…</h2>
+  <p>La app se recargará en unos segundos con los datos actualizados.</p>
+  <script>
+    async function clearAndReload() {
+      // Unregister all service workers
+      if ('serviceWorker' in navigator) {
+        const regs = await navigator.serviceWorker.getRegistrations()
+        await Promise.all(regs.map(r => r.unregister()))
+      }
+      // Clear all caches
+      if ('caches' in window) {
+        const keys = await caches.keys()
+        await Promise.all(keys.map(k => caches.delete(k)))
+      }
+      // Clear old localStorage keys
+      localStorage.removeItem('wedding-planner-v2')
+      localStorage.removeItem('wedding-planner-v1')
+      // Redirect to app
+      window.location.replace('/')
+    }
+    clearAndReload()
+  </script>
+</body>
+</html>
