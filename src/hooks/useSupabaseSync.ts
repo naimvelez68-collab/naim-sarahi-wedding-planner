@@ -117,6 +117,15 @@ export function useSupabaseSync() {
       saveTimer.current = setTimeout(async () => {
         const state = useWeddingStore.getState()
         if (!state.isInitialized) return
+        // Guard: never overwrite Supabase with fewer guests than it already has
+        const { data: current } = await sb.from('wedding_data').select('guests').eq('id', ROW_ID).maybeSingle()
+        const supabaseTotal = Array.isArray(current?.guests) ? current.guests.length : 0
+        if (supabaseTotal > 0 && state.guests.length < supabaseTotal - 5) {
+          console.warn('[Supabase] Abortando guardado: datos locales obsoletos', state.guests.length, '<', supabaseTotal)
+          // Refresh from Supabase instead
+          if (current) applyRow(current)
+          return
+        }
         const row = extractRow()
         const rowKey = JSON.stringify(row)
         if (rowKey === lastSaved.current) return
