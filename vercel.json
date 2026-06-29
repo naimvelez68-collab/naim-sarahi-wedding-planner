@@ -21,6 +21,6 @@
     { "source": "/((?!api/).*)", "destination": "/" }
   ],
   "crons": [
-    { "path": "/api/sync-rsvp", "schedule": "*/10 * * * *" }
+    { "path": "/api/sync-rsvp", "schedule": "0 6 * * *" }
   ]
 }
