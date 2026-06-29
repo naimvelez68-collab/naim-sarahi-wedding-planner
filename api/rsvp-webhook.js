@@ -1,6 +1,8 @@
 // Called by velezguevara-boda.vercel.app when a guest confirms attendance.
 // Marks the matching guest as confirmed in the wedding planner Supabase.
 
+const { createClient } = require('@supabase/supabase-js')
+
 const WP_URL = 'https://hoanquznfonsnzwvitlj.supabase.co'
 const WP_KEY = 'sb_publishable_pUDuYt8e-f14RAyUaK2DZQ_8pauPnZ1'
 const SECRET  = process.env.RSVP_WEBHOOK_SECRET ?? 'boda-naim-sarahi-2026'
@@ -30,12 +32,17 @@ module.exports = async function handler(req, res) {
   if (!nombre) return res.status(400).json({ error: 'nombre required' })
 
   try {
-    // Fetch current guests from Supabase
-    const wpRes = await fetch(`${WP_URL}/rest/v1/wedding_data?id=eq.main&select=guests`, {
-      headers: { apikey: WP_KEY, Authorization: `Bearer ${WP_KEY}` }
-    })
-    const rows = await wpRes.json()
-    const guests = rows[0]?.guests ?? []
+    const supabase = createClient(WP_URL, WP_KEY)
+
+    // Fetch current guests
+    const { data: row, error: fetchErr } = await supabase
+      .from('wedding_data')
+      .select('guests')
+      .eq('id', 'main')
+      .single()
+
+    if (fetchErr) return res.status(500).json({ error: fetchErr.message })
+    const guests = row?.guests ?? []
 
     const incomingNorm = norm(`${nombre} ${apellido || ''}`.trim())
     let matched = 0
@@ -50,14 +57,12 @@ module.exports = async function handler(req, res) {
     })
 
     if (matched > 0) {
-      await fetch(`${WP_URL}/rest/v1/wedding_data?id=eq.main`, {
-        method: 'PATCH',
-        headers: {
-          apikey: WP_KEY, Authorization: `Bearer ${WP_KEY}`,
-          'Content-Type': 'application/json', Prefer: 'return=minimal',
-        },
-        body: JSON.stringify({ guests: updated, updated_at: new Date().toISOString() }),
-      })
+      const { error: updateErr } = await supabase
+        .from('wedding_data')
+        .update({ guests: updated, updated_at: new Date().toISOString() })
+        .eq('id', 'main')
+
+      if (updateErr) return res.status(500).json({ error: updateErr.message })
     }
 
     return res.status(200).json({ ok: true, matched, name: incomingNorm })

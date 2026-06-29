@@ -1,6 +1,8 @@
 // Full sync: reads all confirmed guests from velezguevara-boda and marks them
 // as confirmed in the wedding planner. Safe to run periodically (cron).
 
+const { createClient } = require('@supabase/supabase-js')
+
 const WP_URL = 'https://hoanquznfonsnzwvitlj.supabase.co'
 const WP_KEY = 'sb_publishable_pUDuYt8e-f14RAyUaK2DZQ_8pauPnZ1'
 const RSVP_EXPORT = 'https://velezguevara-boda.vercel.app/api/rsvp-export'
@@ -36,12 +38,16 @@ module.exports = async function handler(req, res) {
     const { guests: rsvpGuests } = await rsvpRes.json()
     const confirmedNorms = (rsvpGuests ?? []).map(r => norm(`${r.nombre} ${r.apellido}`))
 
-    // 2. Fetch current wedding planner guests
-    const wpRes = await fetch(`${WP_URL}/rest/v1/wedding_data?id=eq.main&select=guests`, {
-      headers: { apikey: WP_KEY, Authorization: `Bearer ${WP_KEY}` }
-    })
-    const rows = await wpRes.json()
-    const guests = rows[0]?.guests ?? []
+    // 2. Fetch current wedding planner guests via Supabase client
+    const supabase = createClient(WP_URL, WP_KEY)
+    const { data: rows, error: fetchErr } = await supabase
+      .from('wedding_data')
+      .select('guests')
+      .eq('id', 'main')
+      .single()
+
+    if (fetchErr) return res.status(500).json({ error: fetchErr.message })
+    const guests = rows?.guests ?? []
 
     // 3. Match and update — only set confirmed, never downgrade manually-set status
     const updated = guests.map(g => {
@@ -56,14 +62,12 @@ module.exports = async function handler(req, res) {
     const confirmed = updated.filter(g => g.status === 'confirmed').length
 
     // 4. Save to wedding planner
-    await fetch(`${WP_URL}/rest/v1/wedding_data?id=eq.main`, {
-      method: 'PATCH',
-      headers: {
-        apikey: WP_KEY, Authorization: `Bearer ${WP_KEY}`,
-        'Content-Type': 'application/json', Prefer: 'return=minimal',
-      },
-      body: JSON.stringify({ guests: updated, updated_at: new Date().toISOString() }),
-    })
+    const { error: updateErr } = await supabase
+      .from('wedding_data')
+      .update({ guests: updated, updated_at: new Date().toISOString() })
+      .eq('id', 'main')
+
+    if (updateErr) return res.status(500).json({ error: updateErr.message })
 
     return res.status(200).json({
       ok: true,
